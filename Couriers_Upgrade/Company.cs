@@ -4,7 +4,7 @@ namespace Couriers_Upgrade
 {
     class Company
     {
-        private const double SpeedMultiplier = 0.02;
+        public const double SpeedMultiplier = 0.1;
         public const int Field_Size = 15;
         public const decimal PricePerKiloMeter = 100;
 

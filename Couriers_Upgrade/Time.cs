@@ -10,7 +10,11 @@ namespace Couriers_Upgrade
         {
             Random rnd = new Random();
             Thread.Sleep(30);
-            return date.AddMinutes(rnd.Next(10, 80));
+            return date.AddMinutes(rnd.Next(20, 50));
+        }
+        public static void Time_Now()
+        {
+            Console.WriteLine("Текущее время: {0}", Convert.ToString((DateTime.Now).TimeOfDay).Remove(5));
         }
     }
 }

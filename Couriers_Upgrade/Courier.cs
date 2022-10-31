@@ -22,14 +22,14 @@ namespace Couriers_Upgrade
         // Вывод информации о курьере
         public void Show_Information()
         {
-            Console.WriteLine($"Имя: {Name}; Скорость: {Speed}; Грузоподъёмность: {Capacity}; Минимальная цена: {MinPrice}; Позиция: ({CurrentPostion.X}; {CurrentPostion.Y})");
+            Console.WriteLine($"Имя: {Name}; Скорость: {Speed/Company.SpeedMultiplier}; Грузоподъёмность: {Capacity}; Минимальная цена: {MinPrice}; Позиция: ({CurrentPostion.X}; {CurrentPostion.Y})");
         }
         // Проверяем, может ли курьер взять заказ
         public bool Can_Get(Deliver deliver)
         {
             if (this.IsBusy)
             {
-                Console.WriteLine($"{this.Name} уже взял заказ\n");
+                ColorOutput.Color_Writeline($"{this.Name} уже взял заказ №{this.taken_order.Order_Number}", ConsoleColor.Red);
                 return false;
             }
             else
@@ -38,16 +38,16 @@ namespace Couriers_Upgrade
                 double all_way_to_deliver = Position.GetDistance(this.CurrentPostion, deliver.CurrentPostion) + deliver.Distance;   //Полный путь курьера  
                 way_time = all_way_to_deliver / this.Speed; //Время, за которое курьер справится с работой
                 //Информация для отладки:
-                Console.WriteLine("{0}; Путь для доставки: {1:#.##}; Общее время на доставку: {2:#.##}; Время всего пути: {3:#.##}", this.Name, all_way_to_deliver, time_to_deliver, way_time);
+                //Console.WriteLine("{0}; Путь для доставки: {1:#.##}; Общее время на доставку: {2:#.##}; Время всего пути: {3:#.##}", this.Name, all_way_to_deliver, time_to_deliver, way_time);
 
                 if (time_to_deliver > (all_way_to_deliver / this.Speed) & deliver.Weight < this.Capacity & deliver.Price > this.MinPrice)
                 {
-                    Console.WriteLine($"{this.Name} готов взять заказ");
+                    ColorOutput.Color_Writeline($"{this.Name} готов взять заказ №{deliver.Order_Number}", ConsoleColor.Yellow);
                     return true;
                 }
                 else
                 {
-                    Console.WriteLine($"{this.Name} не подходит под заказ\n");
+                    ColorOutput.Color_Writeline($"{this.Name} не подходит под заказ №{deliver.Order_Number}", ConsoleColor.Red);
                     return false;
                 }
             }
@@ -56,7 +56,7 @@ namespace Couriers_Upgrade
         {
             if (this.IsBusy)
             {
-                Console.WriteLine($"{this.Name} уже взял заказ\n");
+                ColorOutput.Color_Writeline($"{this.Name} уже взял заказ №{this.taken_order.Order_Number}", ConsoleColor.Red);
                 return false;
             }
             else
@@ -67,16 +67,16 @@ namespace Couriers_Upgrade
                 double way_to_pickup = Position.GetDistance(this.CurrentPostion, pickuporder.CurrentPostion);   //Путь курьера до взятия заказа
                 way_time = all_way_to_deliver / this.Speed; //Время, за которое курьер справится с работой
                 //Информация для отладки:
-                Console.WriteLine("{0}; Путь для доставки: {1:#.##}; Общее время на доставку: {2:#.##}; Время на прибытие: {3:#.##}; Время всего пути: {4:#.##}", this.Name, all_way_to_deliver, time_to_deliver, time_to_arrive, way_time);
+                //Console.WriteLine("{0}; Путь для доставки: {1:#.##}; Общее время на доставку: {2:#.##}; Время на прибытие: {3:#.##}; Время всего пути: {4:#.##}", this.Name, all_way_to_deliver, time_to_deliver, time_to_arrive, way_time);
 
                 if (time_to_arrive > (way_to_pickup / this.Speed) & time_to_deliver > (all_way_to_deliver / this.Speed) & pickuporder.Weight < this.Capacity & pickuporder.Price > this.MinPrice)
                 {
-                    Console.WriteLine($"{this.Name} готов взять заказ");
+                    ColorOutput.Color_Writeline($"{this.Name} готов взять заказ №{pickuporder.Order_Number}", ConsoleColor.Yellow);
                     return true;
                 }
                 else
                 {
-                    Console.WriteLine($"{this.Name} не подходит под заказ\n");
+                    ColorOutput.Color_Writeline($"{this.Name} не подходит под заказ №{pickuporder.Order_Number}", ConsoleColor.Red);
                     return false;
                 }
             }
