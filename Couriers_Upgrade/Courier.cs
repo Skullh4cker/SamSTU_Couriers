@@ -85,32 +85,35 @@ namespace Couriers_Upgrade
     class FootCourier : Courier
     {
         //Класс пешего курьера
+        decimal DefaultFootCourierMinPrice = 100;
         public FootCourier()
         {
             Speed = Company.DefaultFootCourierSpeed;
             Capacity = Company.DefaultFootCourierCapacity;
-            MinPrice = Company.DefaultFootCourierMinPrice;
+            MinPrice = DefaultFootCourierMinPrice;
         }
         
     }
     class ScooterCourier : Courier
     {
         //Класс курьера на самокате
+        decimal DefaultScooterCourierMinPrice = 250
         public ScooterCourier()
         {
             Speed = Company.DefaultScooterCourierSpeed;
             Capacity = Company.DefaultScooterCourierCapacity;
-            MinPrice = Company.DefaultScooterCourierMinPrice;
+            MinPrice = DefaultScooterCourierMinPrice;
         }
     }
     class CarCourier : Courier
     {
         //Класс курьера на машине
+        decimal DefaultCarCourierMinPrice = 500;
         public CarCourier()
         {
             Speed = Company.DefaultCarCourierSpeed;
             Capacity = Company.DefaultCarCourierCapacity;
-            MinPrice = Company.DefaultCarCourierMinPrice;
+            MinPrice = DefaultCarCourierMinPrice;
         }
     }
 }

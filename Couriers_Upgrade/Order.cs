@@ -22,8 +22,10 @@ namespace Couriers_Upgrade
             if(Destination == CurrentPostion)
                 Destination = new Position(rnd.Next(1, Company.Field_Size), rnd.Next(1, Company.Field_Size));
             OrderTime = Time.Random_Time(OrderTime);
-            Get_Order_Distance();
-            Price = (decimal)Distance * Company.PricePerKiloMeter;
+            Price = Get_Order_Price();
+            Distance = Get_Order_Distance();
+            
+
             Thread.Sleep(30);
         }
         // Вывод информации о заказе
@@ -31,11 +33,21 @@ namespace Couriers_Upgrade
         {
             Console.WriteLine("Номер: {0:#.##}; Вес: {1:#.##}; Цена: {2:#.##}; Текущая позиция: ({3}; {4}); Место назначения: ({5}; {6}); Доставить к {7}", Order_Number, Weight, Price, CurrentPostion.X, CurrentPostion.Y, Destination.X, Destination.Y, Convert.ToString(OrderTime.TimeOfDay).Remove(5));
         }
-        // Получаем расстояние от текущей позиции заказа к точке доставки
-        public void Get_Order_Distance()
+        // Функция вовзрата дистанции, на которую надо доставить заказ
+        private double Get_Order_Distance()
         {
-            Distance = Position.GetDistance(CurrentPostion, Destination);
+             return Position.GetDistance(CurrentPostion, Destination);
         }
+        // Функция вовзрата цены заказа
+        private decimal Get_Order_Price(decimal distance)
+        {
+            return (decimal)distance * Company.PricePerKiloMeter;
+        }
+        private Courier Choose_Best()
+        {
+
+        }
+        
     }
     // Класс доставки
     class Deliver : Order

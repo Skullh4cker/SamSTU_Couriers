@@ -16,8 +16,5 @@ namespace Couriers_Upgrade
         public const double DefaultScooterCourierCapacity = 40;
         public const double DefaultCarCourierCapacity = 100;
 
-        public const decimal DefaultFootCourierMinPrice = 100;
-        public const decimal DefaultScooterCourierMinPrice = 250;
-        public const decimal DefaultCarCourierMinPrice = 500;
     }
 }
