@@ -5,16 +5,39 @@ namespace Couriers_Upgrade
 {
     class Time
     {
-        // Функция, которая добавляет к полученному моменту времени от 10 до 80 минут, тем самым генерируя случайное время заказа
-        public static DateTime Random_Time(DateTime date)
+        public static DateTime Current_Time { get; private set; }
+        private int Delay = 500;
+        public Time()
+        {
+            Current_Time = DateTime.Now;
+        }
+        public static DateTime Add_Random_Time(DateTime date)
         {
             Random rnd = new Random();
             Thread.Sleep(30);
-            return date.AddMinutes(rnd.Next(20, 50));
+            return date.AddMinutes(rnd.Next(70, 100));
         }
-        public static void Time_Now()
+        public static DateTime Subtract_Random_Time(DateTime date)
         {
-            Console.WriteLine("Текущее время: {0}", Convert.ToString((DateTime.Now).TimeOfDay).Remove(5));
+            Random rnd = new Random();
+            Thread.Sleep(30);
+            return date.AddMinutes(-rnd.Next(30, 50));
+        }
+        public void Timer_Tick()
+        {
+            Current_Time = Current_Time.AddMinutes(1);
+            foreach(var courier in Company.couriers)
+            {
+                if (courier.Taken_Order != null & courier.thread_alive == false)
+                {
+                    courier.thread.Start();
+                }
+            }
+            Thread.Sleep(Delay);
+        }
+        public void Get_Time()
+        {
+            Console.WriteLine($"Текущее время {Convert.ToString(Current_Time.TimeOfDay).Remove(5)}");
         }
     }
 }

@@ -8,98 +8,74 @@ namespace Couriers_Upgrade
     {
         static void Main(string[] args)
         {
-            for(; ; )
-            {
-                Time.Time_Now();
-                HashSet<Courier> couriers = new HashSet<Courier>();
-                HashSet<Courier> relevant_courier = new HashSet<Courier>();
-                HashSet<Deliver> deliver_orders = new HashSet<Deliver>();
-                HashSet<PickUpOrder> pickup_orders = new HashSet<PickUpOrder>();
-                double comparator = double.MaxValue;
+            Time time = new Time();
+           
+            var on_foot = new FootCourier() { Name = "James" };
+            //var on_car = new CarCourier() { Name = "Ryan" };
+            var on_scooter = new ScooterCourier() { Name = "Bob" };
 
-                var on_foot = new FootCourier() { Name = "James" };
-                var on_scooter = new ScooterCourier() { Name = "Bob" };
-                var on_car = new CarCourier() { Name = "Ryan" };
+            var order1 = new Deliver();
+            var order2 = new Deliver();
+            var order3 = new Deliver();
+
+            while (true)
+            {
+                time.Get_Time();
+                char[,] pixels = new char[Company.Field_Size, Company.Field_Size];
+                for (int i = 0; i < Company.Field_Size; i++)
+                {
+                    for (int j = 0; j < Company.Field_Size; j++)
+                    {
+                        pixels[i, j] = '.';
+                    }
+                }
+                foreach (var order in Company.new_orders)
+                {
+                    if(order.Status == 0)
+                    {
+                        order.Choose_Best();
+                    }
+                }
 
                 on_foot.Show_Information();
                 on_scooter.Show_Information();
-                on_car.Show_Information();
-
-                couriers.Add(on_foot);
-                couriers.Add(on_scooter);
-                couriers.Add(on_car);
-
-                var order1 = new Deliver() { Order_Number = 1 };
-                var order2 = new Deliver() { Order_Number = 2 };
-                var order3 = new PickUpOrder() { Order_Number = 3 };
+                //on_car.Show_Information();
 
                 order1.Show_Information();
                 order2.Show_Information();
                 order3.Show_Information();
 
-                deliver_orders.Add(order1);
-                deliver_orders.Add(order2);
-                pickup_orders.Add(order3);
-
-                foreach (var deliver_order in deliver_orders)
+                Console.WriteLine("Схема: курьеры(1), точки взятия заказов(*), точки доставки(^)");
+                foreach (var dot in Company.dots)
                 {
-                    foreach (var courier in couriers)
+                    if(pixels[dot.Y - 1, dot.X - 1] == '1')
                     {
-                        if (courier.Can_Get(deliver_order) & courier.IsBusy != true)
-                        {
-                            relevant_courier.Add(courier);
-                        }
+                        continue;
                     }
-                    foreach (var courier in relevant_courier)
+                    if(dot.coord_symbol == '1')
                     {
-                        if (courier.way_time < comparator)
-                        {
-                            comparator = courier.way_time;
-                        }
+                        pixels[dot.Y-1, dot.X-1] = dot.coord_symbol;
                     }
-                    foreach (var courier in relevant_courier)
+                    else if(dot.coord_symbol == '*' || dot.coord_symbol == '^')
                     {
-                        if (courier.way_time == comparator)
-                        {
-                            ColorOutput.Color_Writeline($"Заказ №{deliver_order.Order_Number} выдан курьеру {courier.Name} как самому подходящему", ConsoleColor.Green);
-                            courier.taken_order = deliver_order;
-                            courier.IsBusy = true;
-                        }
+                        pixels[dot.Y-1, dot.X-1] = dot.coord_symbol;
                     }
-                    relevant_courier.Clear();
-                    comparator = double.MaxValue;
                 }
-                foreach (var pickup_order in pickup_orders)
+                
+                for (int i = 0; i < Company.Field_Size; i++)
                 {
-                    foreach (var courier in couriers)
+                    for (int j = 0; j < Company.Field_Size; j++)
                     {
-                        if (courier.Can_Get(pickup_order) & courier.IsBusy != true)
-                        {
-                            relevant_courier.Add(courier);
-                        }
+                        Console.Write($"{pixels[i, j]} ");
                     }
-                    foreach (var courier in relevant_courier)
-                    {
-                        if (courier.way_time < comparator)
-                        {
-                            comparator = courier.way_time;
-                        }
-                    }
-                    foreach (var courier in relevant_courier)
-                    {
-                        if (courier.way_time == comparator)
-                        {
-                            ColorOutput.Color_Writeline($"Заказ №{pickup_order.Order_Number} выдан курьеру {courier.Name} как самому подходящему", ConsoleColor.Green);
-                            courier.taken_order = pickup_order;
-                            courier.IsBusy = true;
-                        }
-                    }
-                    relevant_courier.Clear();
-                    comparator = double.MaxValue;
+                    Console.WriteLine();
                 }
-                Console.ReadKey();
+                
+                time.Timer_Tick();
+                //Console.SetCursorPosition(0, 0);
                 Console.Clear();
             }
+
         }
     }
 }
