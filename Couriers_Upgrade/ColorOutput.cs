@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Couriers_Upgrade
+namespace SamSTU_Curiers
 {
     class ColorOutput
     {

@@ -2,79 +2,127 @@
 using System.Collections.Generic;
 using System.Threading;
 
-namespace Couriers_Upgrade
+namespace SamSTU_Couriers
 {
     class Program
     {
         static void Main(string[] args)
         {
+            Console.Write("Введите размер поля: ");
+            int.TryParse(Console.ReadLine(), out Company.FieldSize);
+            Company.PricePerKilometer = Company.FieldSize / (decimal)0.0214;
+            Random rnd = new Random();
+            int courier_count;
+            int order_count;
             Time time = new Time();
-           
-            var on_foot = new FootCourier() { Name = "James" };
-            //var on_car = new CarCourier() { Name = "Ryan" };
-            var on_scooter = new ScooterCourier() { Name = "Bob" };
-
-            var order1 = new Deliver();
-            var order2 = new Deliver();
-            var order3 = new Deliver();
-
+            char[,] pixels = new char[Company.FieldSize, Company.FieldSize];
+            bool exit = false;
+            Console.Write("Введите число курьеров: ");
+            int.TryParse(Console.ReadLine(), out courier_count);
+            Console.Write("Введите число заказов для выполнения: ");
+            int.TryParse(Console.ReadLine(), out order_count);
+            Console.Clear();
+            for(int i = 0; i < courier_count; i++)
+            {
+                ScooterCourier scooter = new ScooterCourier();
+            }
             while (true)
             {
-                time.Get_Time();
-                char[,] pixels = new char[Company.Field_Size, Company.Field_Size];
-                for (int i = 0; i < Company.Field_Size; i++)
+                if(Company.OrderCounter == order_count)
                 {
-                    for (int j = 0; j < Company.Field_Size; j++)
+                    foreach (var order in Company.all_orders)
+                    {
+                        if (order.Status == 3 || order.Status == 255)
+                        {
+                            exit = true;
+                        }
+                        else
+                        {
+                            exit = false;
+                            break;
+                        }
+                    }
+                }
+
+                Console.WriteLine("Деньги компании: {0:#.##}$", Company.Money);
+                time.PrintTime();
+
+                if (rnd.Next(1, 10) == 4 && Company.OrderCounter < order_count)
+                {
+                    Deliver delivery = new Deliver();
+                }
+
+                for (int i = 0; i < Company.FieldSize; i++)
+                {
+                    for (int j = 0; j < Company.FieldSize; j++)
                     {
                         pixels[i, j] = '.';
                     }
                 }
+
                 foreach (var order in Company.new_orders)
                 {
-                    if(order.Status == 0)
+                    if (order.Status == 0)
                     {
-                        order.Choose_Best();
+                        order.ChooseBest();
                     }
                 }
-
-                on_foot.Show_Information();
-                on_scooter.Show_Information();
-                //on_car.Show_Information();
-
-                order1.Show_Information();
-                order2.Show_Information();
-                order3.Show_Information();
-
-                Console.WriteLine("Схема: курьеры(1), точки взятия заказов(*), точки доставки(^)");
-                foreach (var dot in Company.dots)
+                foreach (var order in Company.all_orders)
                 {
-                    if(pixels[dot.Y - 1, dot.X - 1] == 'C')
+                    order.CheckOverdue();
+                }
+
+                PrintInformation();
+
+                foreach (var dot in Company.Dots)
+                {
+                    if (pixels[dot.Y - 1, dot.X - 1] == 'C')
                     {
                         continue;
                     }
-                    if(dot.coord_symbol == 'C')
+                    if (dot.CoordSymbol == 'C')
                     {
-                        pixels[dot.Y-1, dot.X-1] = dot.coord_symbol;
+                        pixels[dot.Y - 1, dot.X - 1] = dot.CoordSymbol;
                     }
-                    else if(dot.coord_symbol == '*' || dot.coord_symbol == '^')
+                    else if (dot.CoordSymbol == '*' || dot.CoordSymbol == '^')
                     {
-                        pixels[dot.Y-1, dot.X-1] = dot.coord_symbol;
+                        pixels[dot.Y - 1, dot.X - 1] = dot.CoordSymbol;
                     }
                 }
-                
-                for (int i = 0; i < Company.Field_Size; i++)
+                for (int i = 0; i < Company.FieldSize; i++)
                 {
-                    for (int j = 0; j < Company.Field_Size; j++)
+                    for (int j = 0; j < Company.FieldSize; j++)
                     {
-                        Console.Write($"{pixels[i, j]} ");
+                        Console.Write("{0} ", pixels[i, j]);
                     }
-                    Console.WriteLine("");
+                    Console.WriteLine();
                 }
-                
-                time.Timer_Tick();
-                //Console.SetCursorPosition(0, 0);
-                Console.Clear();
+
+                time.TimerTick();
+
+                Console.SetCursorPosition(0, 0);
+                if (exit)
+                    break;
             }
+            Console.SetCursorPosition(0, 6 + Company.FieldSize + Company.all_orders.Count + Company.couriers.Count);
+            ColorOutput.ColorWriteLine("Работа завершена!", ConsoleColor.Green);
+            Console.ReadKey();
+        }
+        static void PrintInformation()
+        {
+            
+            foreach (var courier in Company.couriers)
+            {
+                courier.ShowInfromation();
+            }
+            
+            
+            foreach (var order in Company.all_orders)
+            {
+                order.ShowInformation();
+            }
+            
+            Console.WriteLine("Схема: курьеры(C), точки взятия заказов(*), точки доставки(^)");
         }
     }
 }

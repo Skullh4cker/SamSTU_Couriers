@@ -1,43 +1,52 @@
 ﻿using System;
 using System.Threading;
 
-namespace Couriers_Upgrade
+namespace SamSTU_Couriers
 {
     class Time
     {
         public static DateTime Current_Time { get; private set; }
-        private int Delay = 500;
+        public static int Delay = 50;
         public Time()
         {
             Current_Time = DateTime.Now;
         }
-        public static DateTime Add_Random_Time(DateTime date)
+        public static DateTime AddRandomTime(DateTime date)
         {
             Random rnd = new Random();
-            Thread.Sleep(30);
-            return date.AddMinutes(rnd.Next(70, 100));
+            Thread.Sleep(1);
+            return date.AddMinutes(rnd.Next(50, 60));
         }
-        public static DateTime Subtract_Random_Time(DateTime date)
+        public static DateTime SubtractRandomTime(DateTime date)
         {
             Random rnd = new Random();
-            Thread.Sleep(30);
-            return date.AddMinutes(-rnd.Next(30, 50));
+            Thread.Sleep(1);
+            return date.AddMinutes(-rnd.Next(30, 40));
         }
-        public void Timer_Tick()
+        public void TimerTick()
         {
             Current_Time = Current_Time.AddMinutes(1);
             foreach(var courier in Company.couriers)
             {
-                if (courier.Taken_Order != null & courier.thread_alive == false)
+                if (courier.Taken_Order != null)
                 {
-                    courier.thread.Start();
+                    courier.OrderMovement();
                 }
+                /*
+                else
+                {
+                    courier.RandomMovement();
+                }*/
             }
             Thread.Sleep(Delay);
         }
-        public void Get_Time()
+        public void PrintTime()
         {
-            Console.WriteLine($"Текущее время {Convert.ToString(Current_Time.TimeOfDay).Remove(5)}");
+            Console.WriteLine("Текущее время {0}", Convert.ToString(Current_Time.TimeOfDay).Remove(5));
+        }
+        public static DateTime GetTime()
+        {
+            return Current_Time;
         }
     }
 }

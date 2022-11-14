@@ -1,17 +1,17 @@
 ﻿using System;
 
-namespace Couriers_Upgrade
+namespace SamSTU_Couriers
 {
     class Position
     {
         public int X { get; set; }
         public int Y { get; set; }
-        public char coord_symbol { get; set; }
+        public char CoordSymbol { get; set; }
         public Position(int x, int y, char symbol)
         {
             X = x;
             Y = y;
-            coord_symbol = symbol;
+            CoordSymbol = symbol;
         }
         // Функция для рассчёта дистанции между двумя точками
         public static double GetDistance(Position pos1, Position pos2)
