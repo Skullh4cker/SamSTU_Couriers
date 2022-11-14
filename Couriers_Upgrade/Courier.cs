@@ -20,7 +20,7 @@ namespace Couriers_Upgrade
         double y;
         public Courier()
         {
-            CurrentPostion = new Position(rnd.Next(1, Company.Field_Size), rnd.Next(1, Company.Field_Size), '1');
+            CurrentPostion = new Position(rnd.Next(1, Company.Field_Size), rnd.Next(1, Company.Field_Size), 'C');
             thread = new Thread(Test_Movement);
             Company.dots.Add(CurrentPostion);
             Company.couriers.Add(this);

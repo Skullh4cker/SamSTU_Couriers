@@ -48,11 +48,11 @@ namespace Couriers_Upgrade
                 Console.WriteLine("Схема: курьеры(1), точки взятия заказов(*), точки доставки(^)");
                 foreach (var dot in Company.dots)
                 {
-                    if(pixels[dot.Y - 1, dot.X - 1] == '1')
+                    if(pixels[dot.Y - 1, dot.X - 1] == 'C')
                     {
                         continue;
                     }
-                    if(dot.coord_symbol == '1')
+                    if(dot.coord_symbol == 'C')
                     {
                         pixels[dot.Y-1, dot.X-1] = dot.coord_symbol;
                     }
@@ -68,14 +68,13 @@ namespace Couriers_Upgrade
                     {
                         Console.Write($"{pixels[i, j]} ");
                     }
-                    Console.WriteLine();
+                    Console.WriteLine("");
                 }
                 
                 time.Timer_Tick();
                 //Console.SetCursorPosition(0, 0);
                 Console.Clear();
             }
-
         }
     }
 }
