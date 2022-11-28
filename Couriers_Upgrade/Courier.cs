@@ -3,7 +3,7 @@ using System.Threading;
 
 namespace SamSTU_Couriers
 {
-    abstract class Courier
+abstract class Courier
     {
         public string Name { get; set; }
         protected double Speed { get; set; }
@@ -11,11 +11,13 @@ namespace SamSTU_Couriers
         public decimal Salary { get; protected set; }
         public bool IsBusy { get; set; }
         public double way_time { get; protected set; }
+        public double FreeTime { get; protected set; }
         public Position CurrentPosition;
-        public Order Taken_Order { get; set; }
-        public bool thread_alive = false;
+        public Order TakenOrder { get; set; }
+        public List<Order> PlanningOrders = new List<Order>();
+
         private Random rnd = new Random();
-        //public Thread thread;
+        public List<double> time_m = new List<double>();
         double x;
         double y;
         public Courier()
@@ -24,76 +26,103 @@ namespace SamSTU_Couriers
             CurrentPosition = new Position(rnd.Next(1, Company.FieldSize), rnd.Next(1, Company.FieldSize), 'C');
             x = CurrentPosition.X;
             y = CurrentPosition.Y;
-            //thread = new Thread(ThreadMovement);
             Company.Dots.Add(CurrentPosition);
             Company.couriers.Add(this);
             Name = Company.courier_names[rnd.Next(1, Company.courier_names.Count)];
         }
-        // Вывод информации о курьере
         public void ShowInfromation()
         {
-            if (Taken_Order != null)
+            if (TakenOrder != null)
             {
-                Console.WriteLine("Имя: {0}; Взятый номер заказа: {1}; Скорость: {2}; Грузоподъёмность: {3}; Минимальная цена: {4}; Позиция: ({5}; {6})", Name, Taken_Order.OrderNumber, Speed / Company.SpeedMultiplier, Capacity, Salary, CurrentPosition.X, CurrentPosition.Y);
+                Console.WriteLine("Имя: {0}; Взятый номер заказа: {1}; Скорость: {2}; Грузоподъёмность: {3}; Минимальная цена: {4}; Позиция: ({5}; {6})", Name, TakenOrder.OrderNumber, Speed / Company.SpeedMultiplier, Capacity, Salary, CurrentPosition.X, CurrentPosition.Y);
             }
             else
             {
                 Console.WriteLine("Имя: {0}; Скорость: {1}; Грузоподъёмность: {2}; Минимальная цена: {3}; Позиция: ({4}; {5})", Name, Speed / Company.SpeedMultiplier, Capacity, Salary, CurrentPosition.X, CurrentPosition.Y);
             }
         }
-        // Проверяем, может ли курьер взять заказ
-        public bool CanGet(Order order)
+        public bool CanGet(Order order4)
         {
             if (this.IsBusy)
             {
-                //ColorOutput.Color_Writeline($"{Name} уже взял заказ №{Queue_Order.Order_Number}", ConsoleColor.Red);
-                return false;
-            }
-            else
-            {
-                double way_to_pickup = Position.GetDistance(CurrentPosition, order.CurrentPostion);
-                double all_way_to_deliver = Position.GetDistance(CurrentPosition, order.CurrentPostion) + order.Distance;
-                double time_to_deliver = (order.DeliveryTime - Time.Current_Time).TotalMinutes;   //Время, за которое заказ должен быть доставлен
-                double time_to_arrive = (order.PickUpTime - Time.Current_Time).TotalMinutes;
-                way_time = all_way_to_deliver / Speed;
-
-                if (order.SimpleDeliever)
+                if (PlanningOrders.Count > 0)
                 {
-                    if (time_to_deliver > (all_way_to_deliver / Speed) & order.Weight < Capacity & order.Price > Salary)
+                    DateTime release = new DateTime();
+                    double free_time = 0;
+                    for (int i = 0; i < time_m.Count; i++)
                     {
-                        //ColorOutput.Color_Writeline($"{Name} готов взять заказ №{order.Order_Number}", ConsoleColor.Yellow);
-                        return true;
+                        free_time += time_m[i];
                     }
-                    else
-                    {
-                        //ColorOutput.Color_Writeline($"{Name} не подходит под заказ №{order.Order_Number}", ConsoleColor.Red);
-                        return false;
-                    }
+                    release = Time.Current_Time.AddMinutes(free_time);
+                    return CheckParameters(order4, release, PlanningOrders.Last().Destination);
                 }
                 else
                 {
-                    if (time_to_arrive > (way_to_pickup / Speed) & time_to_deliver > (all_way_to_deliver / Speed) & order.Weight < Capacity & order.Price > Salary)
-                    {
-                        //ColorOutput.Color_Writeline($"{Name} готов взять заказ №{order.Order_Number}", ConsoleColor.Yellow);
-                        return true;
-                    }
-                    else
-                    {
-                        //ColorOutput.Color_Writeline($"{Name} не подходит под заказ №{order.Order_Number}", ConsoleColor.Red);
-                        return false;
-                    }
+                    double free_time = 0;
+                    DateTime release = new DateTime();
+                    free_time += TakenOrder.Plan.EstimatedTimeOfExecution;
+                    release = Time.Current_Time.AddMinutes(free_time);
+                    return CheckParameters(order4, release, TakenOrder.Destination);
                 }
             }
+            else
+            {
+                return CheckParameters(order4, Time.Current_Time, CurrentPosition);
+            }
+        }
+        public bool CheckParameters(Order order2, DateTime time, Position courier_position)
+        {
+            double way_to_pickup = Position.GetDistance(courier_position, order2.CurrentPostion);
+            double all_way_to_deliver = Position.GetDistance(courier_position, order2.CurrentPostion) + order2.Distance;
+            double time_to_deliver = (order2.DeliveryTime - time).TotalMinutes;
+            double time_to_arrive = (order2.PickUpTime - time).TotalMinutes;
+            way_time = FindWayTime(order2, courier_position);
+
+            if (!(order2.Price > Salary & order2.Weight < Capacity))
+                return false;
+            else
+            {
+                if (order2.SimpleDeliever)
+                    return time_to_deliver > (all_way_to_deliver / Speed);
+                else
+                    return (time_to_arrive > (way_to_pickup / Speed) & time_to_deliver > (all_way_to_deliver / Speed));
+            }
+        }
+        public double FindWayTime(Order order1, Position courier_position)
+        {
+            double all_way_to_deliver = Position.GetDistance(courier_position, order1.CurrentPostion) + order1.Distance;
+            return all_way_to_deliver / Speed;
+        }
+        public double FindWayTime2(Order order1)
+        {
+            double all_way_to_deliver = Position.GetDistance(CurrentPosition, order1.CurrentPostion) + order1.Distance;
+            return all_way_to_deliver / Speed;
+        }
+        public PlanningOption RequestPlanning(Order order)
+        {
+            var planningOption = new PlanningOption();
+            planningOption.Courier = this;
+            planningOption.Order = order;
+            planningOption.CourierPrice = (decimal)(Position.GetDistance(this.CurrentPosition, order.CurrentPostion) * Company.DefaultCourierSalaryMultiplier);
+            if(PlanningOrders.Count > 0)
+            {
+                planningOption.EstimatedTimeOfExecution = FindWayTime(order, PlanningOrders.Last().Destination);
+            }
+            else
+            {
+                planningOption.EstimatedTimeOfExecution = FindWayTime2(order);
+            }
+            
+            return planningOption;
         }
         public void OrderMovement()
         {
-            //thread_alive = true;
             while (true)
             {
-                if (this.Taken_Order != null)
+                if (this.TakenOrder != null)
                 {
 
-                    switch (this.Taken_Order.Status)
+                    switch (this.TakenOrder.Status)
                     {
                         case 1:
                             this.MoveToPickUpTick();
@@ -102,13 +131,10 @@ namespace SamSTU_Couriers
                             this.MoveToDelieverTick();
                             break;
                         case 3:
-                            //thread_alive = false;
                             break;
                     }
                 }
-                //thread_alive = true;
                 break;
-                //Thread.Sleep(Time.Delay);
             }
         }
         public void RandomMovement()
@@ -119,34 +145,37 @@ namespace SamSTU_Couriers
         public void MoveToPickUpTick()
         {
 
-            if(this.CurrentPosition.X == Taken_Order.CurrentPostion.X & this.CurrentPosition.Y == Taken_Order.CurrentPostion.Y)
+            if(this.CurrentPosition.X == TakenOrder.CurrentPostion.X & this.CurrentPosition.Y == TakenOrder.CurrentPostion.Y)
             {
-                Taken_Order.Status = 2;
+                TakenOrder.Status = 2;
             }
             else
             {
-                Move(this.CurrentPosition, Taken_Order.CurrentPostion, false);
+                Move(this.CurrentPosition, TakenOrder.CurrentPostion, false);
             }
         }
         public void MoveToDelieverTick()
         {
-            if (this.CurrentPosition.X == Taken_Order.Destination.X & this.CurrentPosition.Y == Taken_Order.Destination.Y)
+            if (this.CurrentPosition.X == TakenOrder.Destination.X & this.CurrentPosition.Y == TakenOrder.Destination.Y)
             {
-                Taken_Order.Status = 3;
+                TakenOrder.Status = 3;
                 try
                 {
-                    Taken_Order.DeliverOrder(this);
+                    TakenOrder.DeliverOrder(this);
                 }
                 catch
                 {
 
                 }
-                Taken_Order = null;
+                time_m.Remove(TakenOrder.Plan.EstimatedTimeOfExecution);
+                TakenOrder = null;
                 IsBusy = false;
+                if (PlanningOrders.Count > 0)
+                    ChooseOrder();
             }
             else
             {
-                Move(this.CurrentPosition, Taken_Order.Destination, true);
+                Move(this.CurrentPosition, TakenOrder.Destination, true);
             }
         }
         public void Move(Position courier, Position order, bool order_taken)
@@ -195,15 +224,25 @@ namespace SamSTU_Couriers
             }
             if (order_taken)
             {
-                Taken_Order.CurrentPostion.X = CurrentPosition.X;
-                Taken_Order.CurrentPostion.Y = CurrentPosition.Y;
+                TakenOrder.CurrentPostion.X = CurrentPosition.X;
+                TakenOrder.CurrentPostion.Y = CurrentPosition.Y;
             }
         }
-        public void TakeOrder(Order order)
+        public void AddOrderToPlan(Order order)
         {
-            if (Company.IsProfitable(order, this))
+            time_m.Add(order.Plan.EstimatedTimeOfExecution);
+            PlanningOrders.Add(order);
+            if (!IsBusy)
+                ChooseOrder();
+        }
+        public void ChooseOrder()
+        {
+            PlanningOrders = PlanningOrders.OrderBy(plan => Position.GetDistance(plan.CurrentPostion, CurrentPosition)).ToList();
+            if(PlanningOrders.Count > 0)
             {
-                Taken_Order = order;
+                var order = PlanningOrders[0];
+                PlanningOrders.RemoveAt(0);
+                TakenOrder = order;
                 IsBusy = true;
             }
         }

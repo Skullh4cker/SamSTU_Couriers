@@ -16,6 +16,8 @@ namespace SamSTU_Couriers
         public double Weight { get; set; }
         public decimal Price { get; protected set; }
         public byte Status { get; set; }
+        public bool IsPlanned { get { return Plan != null; } }
+        public PlanningOption Plan { get; protected set; }
         Random rnd = new Random();
         public Order()
         {
@@ -23,7 +25,7 @@ namespace SamSTU_Couriers
             Status = 0;
             Weight = rnd.Next(1, 5);
             CurrentPostion = new Position(rnd.Next(1, Company.FieldSize), rnd.Next(1, Company.FieldSize), '*');
-            Destination = CurrentPostion;
+            Destination = new Position(rnd.Next(1, Company.FieldSize), rnd.Next(1, Company.FieldSize), '^');
             if (Destination == CurrentPostion)
                 Destination = new Position(rnd.Next(1, Company.FieldSize), rnd.Next(1, Company.FieldSize), '^');
             DeliveryTime = Time.AddRandomTime(Time.Current_Time);
@@ -84,40 +86,33 @@ namespace SamSTU_Couriers
         {
             return (decimal)distance * Company.PricePerKilometer;
         }
-        /// <summary>
-        /// Выбрать лучшего курьера
-        /// </summary>
         public void ChooseBest()
         {
-            double comparator = double.MaxValue;
-            HashSet<Courier> relevant_couriers = new HashSet<Courier>();
-            foreach (var courier in Company.couriers)
-            {
-                if (courier.CanGet(this) & !courier.IsBusy)
-                {
-                    relevant_couriers.Add(courier);
-                }
-            }
-
-            //var best = relevant_couriers.OrderBy(x => x.way_time).FirstOrDefault();
+            var planning_options = new List<PlanningOption>();
+            var relevant_couriers = Company.GetRelevantCouriers(this);
 
             foreach (var courier in relevant_couriers)
             {
-                if (courier.way_time < comparator)
-                {
-                    comparator = courier.way_time;
-                }
+                var planningOption = courier.RequestPlanning(this);
+                planning_options.Add(planningOption);
             }
-            foreach (var courier in relevant_couriers)
+
+            if (planning_options.Count() > 0)
             {
-                if (courier.way_time == comparator)
+                var best_option = ChooseBestPlan(planning_options);
+                if(best_option != null)
                 {
-                    //ColorOutput.Color_Writeline($"Заказ №{Order_Number} выдан курьеру {courier.Name} как самому подходящему", ConsoleColor.Green);
-                    Status = 1;
-                    courier.TakeOrder(this);
+                    this.Status = 1;
+                    Plan = best_option;
+                    Plan.Courier.AddOrderToPlan(this);
                 }
             }
-            relevant_couriers.Clear();
+        }
+        public PlanningOption ChooseBestPlan(List<PlanningOption> options)
+        {
+            var best_options = options.OrderByDescending(x => x.Profit);
+            var best_option = best_options.FirstOrDefault(best => best.Profit > 0);
+            return best_option;
         }
         /// <summary>
         /// Доставить заказ
@@ -128,7 +123,7 @@ namespace SamSTU_Couriers
             Company.new_orders.Dequeue();
             Company.Dots.Remove(CurrentPostion);
             Company.Dots.Remove(Destination);
-            Company.AddMoney(Price, courier.Salary);
+            Company.AddMoney(Plan.Profit);
         }
         /// <summary>
         /// Проверить, является ли данный заказ просроченным

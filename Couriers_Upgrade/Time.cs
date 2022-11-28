@@ -3,10 +3,10 @@ using System.Threading;
 
 namespace SamSTU_Couriers
 {
-    class Time
+class Time
     {
         public static DateTime Current_Time { get; private set; }
-        public static int Delay = 50;
+        public static int Delay = 30;
         public Time()
         {
             Current_Time = DateTime.Now;
@@ -23,12 +23,12 @@ namespace SamSTU_Couriers
             Thread.Sleep(1);
             return date.AddMinutes(-rnd.Next(30, 40));
         }
-        public void TimerTick()
+        public static void TimerTick()
         {
             Current_Time = Current_Time.AddMinutes(1);
             foreach(var courier in Company.couriers)
             {
-                if (courier.Taken_Order != null)
+                if (courier.TakenOrder != null)
                 {
                     courier.OrderMovement();
                 }
@@ -40,7 +40,11 @@ namespace SamSTU_Couriers
             }
             Thread.Sleep(Delay);
         }
-        public void PrintTime()
+        public static double GetDifference(DateTime date1, DateTime date2)
+        {
+            return (date2 - date1).TotalMinutes;
+        }
+        public static void PrintTime()
         {
             Console.WriteLine("Текущее время {0}", Convert.ToString(Current_Time.TimeOfDay).Remove(5));
         }

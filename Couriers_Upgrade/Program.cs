@@ -8,12 +8,13 @@ namespace SamSTU_Couriers
     {
         static void Main(string[] args)
         {
-            Console.Write("Введите размер поля: ");
-            int.TryParse(Console.ReadLine(), out Company.FieldSize);
+            int courier_count = 5;
+            int order_count = 20;
+            //Console.Write("Введите размер поля: ");
+            //int.TryParse(Console.ReadLine(), out Company.FieldSize);
             Company.PricePerKilometer = Company.FieldSize / (decimal)0.0214;
             Random rnd = new Random();
-            int courier_count;
-            int order_count;
+
             Time time = new Time();
             char[,] pixels = new char[Company.FieldSize, Company.FieldSize];
             bool exit = false;
@@ -45,11 +46,12 @@ namespace SamSTU_Couriers
                 }
 
                 Console.WriteLine("Деньги компании: {0:#.##}$", Company.Money);
-                time.PrintTime();
+                Time.PrintTime();
 
-                if (rnd.Next(1, 10) == 4 && Company.OrderCounter < order_count)
+                while (Company.OrderCounter < order_count)
                 {
                     Deliver delivery = new Deliver();
+                    delivery.DeliveryTime = DateTime.Now.AddHours(5);
                 }
 
                 for (int i = 0; i < Company.FieldSize; i++)
@@ -71,9 +73,9 @@ namespace SamSTU_Couriers
                 {
                     order.CheckOverdue();
                 }
-
+                
                 PrintInformation();
-
+                
                 foreach (var dot in Company.Dots)
                 {
                     if (pixels[dot.Y - 1, dot.X - 1] == 'C')
@@ -89,6 +91,7 @@ namespace SamSTU_Couriers
                         pixels[dot.Y - 1, dot.X - 1] = dot.CoordSymbol;
                     }
                 }
+                
                 for (int i = 0; i < Company.FieldSize; i++)
                 {
                     for (int j = 0; j < Company.FieldSize; j++)
@@ -97,15 +100,15 @@ namespace SamSTU_Couriers
                     }
                     Console.WriteLine();
                 }
-
-                time.TimerTick();
-
+                
+                Time.TimerTick();
+                //Console.Clear();
                 Console.SetCursorPosition(0, 0);
                 if (exit)
                     break;
             }
-            Console.SetCursorPosition(0, 6 + Company.FieldSize + Company.all_orders.Count + Company.couriers.Count);
-            ColorOutput.ColorWriteLine("Работа завершена!", ConsoleColor.Green);
+            //Console.SetCursorPosition(0, 6 + Company.FieldSize + Company.all_orders.Count + Company.couriers.Count);
+            //ColorOutput.ColorWriteLine("Работа завершена!", ConsoleColor.Green);
             Console.ReadKey();
         }
         static void PrintInformation()
