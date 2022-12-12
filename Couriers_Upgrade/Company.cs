@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace SamSTU_Couriers
+namespace Courier_Upgrade
 {
     class Company
     {

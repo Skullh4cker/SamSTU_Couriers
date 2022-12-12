@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SamSTU_Couriers
+namespace Courier_Upgrade
 {
     class Position
     {

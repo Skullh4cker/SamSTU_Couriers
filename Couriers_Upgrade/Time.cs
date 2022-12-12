@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading;
 
-namespace SamSTU_Couriers
+namespace Courier_Upgrade
 {
 class Time
     {
