@@ -47,6 +47,7 @@
     <Compile Include="Company.cs" />
     <Compile Include="Courier.cs" />
     <Compile Include="Order.cs" />
+    <Compile Include="PlanningOption.cs" />
     <Compile Include="Position.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

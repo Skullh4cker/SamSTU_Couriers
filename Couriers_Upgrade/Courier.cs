@@ -13,7 +13,6 @@ abstract class Courier
         public decimal Salary { get; protected set; }
         public bool IsBusy { get; set; }
         public double way_time { get; protected set; }
-        public double FreeTime { get; protected set; }
         public Position CurrentPosition;
         public Order TakenOrder { get; set; }
         public List<Order> PlanningOrders = new List<Order>();

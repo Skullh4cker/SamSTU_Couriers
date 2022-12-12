@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Couriers_Upgrade
+namespace Courier_Upgrade
 {
     class PlanningOption
     {
